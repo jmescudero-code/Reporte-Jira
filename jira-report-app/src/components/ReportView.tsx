@@ -1,0 +1,174 @@
+"use client";
+
+import { LOGO_BASE64 } from "@/utils/logo";
+
+import React, { forwardRef } from "react";
+import { ReportData } from "@/types/jira";
+import { Clock, CheckCircle2, LayoutGrid, CheckSquare } from "lucide-react";
+
+type ReportViewProps = {
+  data: ReportData | null;
+};
+
+export const ReportView = forwardRef<HTMLDivElement, ReportViewProps>(
+  ({ data }, ref) => {
+    if (!data) {
+      return (
+        <div className="flex h-full items-center justify-center text-[var(--muted)]">
+          Selecciona un período y presiona "Actualizar desde Jira" para generar
+          el informe.
+        </div>
+      );
+    }
+
+    if (data.totalClosures === 0) {
+      return (
+        <div className="flex h-full items-center justify-center text-[var(--muted)]">
+          No se detectaron elementos finalizados en Jira para el período
+          seleccionado.
+        </div>
+      );
+    }
+
+    return (
+      <div ref={ref} className="page bg-[var(--bg)] font-sans text-[var(--text)]">
+        {/* Topbar */}
+        <div className="flex h-[70px] items-center justify-between bg-white px-6 shadow-sm shrink-0">
+          <div className="flex items-center gap-2">
+            <img
+              src={`data:image/png;base64,${LOGO_BASE64}`}
+              alt="GrupaMar Logo"
+              className="h-11 w-auto object-contain"
+            />
+          </div>
+          <div className="rounded-full bg-[var(--soft)] border border-[var(--line)] px-4 py-1.5 text-sm font-medium text-[var(--blue)]">
+            {data.periodLabel}
+          </div>
+        </div>
+
+        <div className="content flex flex-col p-6 gap-6 overflow-hidden">
+          {/* Header */}
+          <div className="flex shrink-0 gap-6">
+            <div className="flex flex-1 flex-col justify-center rounded-xl bg-gradient-to-r from-[var(--blue)] to-[var(--cyan)] p-6 text-white shadow-md">
+              <h1 className="text-2xl font-bold">
+                Avance de la semana
+              </h1>
+              <p className="mt-1 text-white/80 text-sm">
+                {data.startDate} — {data.endDate}
+              </p>
+            </div>
+
+            <div className="flex gap-4">
+              <KpiCard
+                title="Elementos finalizados"
+                value={data.totalClosures}
+                icon={<CheckCircle2 size={24} className="text-[var(--ok)]" />}
+              />
+              <KpiCard
+                title="Espacios con cierres"
+                value={data.projectsWithClosures}
+                icon={<LayoutGrid size={24} className="text-[var(--blue)]" />}
+              />
+              <KpiCard
+                title="Frentes con avance"
+                value={data.frontsWithProgress}
+                icon={<CheckSquare size={24} className="text-[var(--cyan)]" />}
+              />
+              <KpiCard
+                title="Fuera de fecha"
+                value={data.lateClosures}
+                icon={<Clock size={24} className="text-[var(--orange)]" />}
+              />
+            </div>
+          </div>
+
+          {/* Grid de Proyectos */}
+          <div className="grid-projects">
+            {data.projects.map((project) => (
+              <div
+                key={project.projectKey}
+                className="project-card rounded-xl bg-white border border-[var(--line)] shadow-sm"
+              >
+                {/* Project Header */}
+                <div className="flex items-center gap-3 border-b border-[var(--line)] bg-[var(--soft)] px-5 py-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--blue)] text-xs font-bold text-white shrink-0">
+                    {project.totalClosures}
+                  </div>
+                  <div className="flex flex-col truncate">
+                    <span className="text-sm font-bold truncate">
+                      {project.projectName}
+                    </span>
+                    <span className="text-xs text-[var(--muted)]">
+                      {project.projectKey}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Project Fronts */}
+                <div className="fronts p-4 flex flex-col gap-5">
+                  {project.fronts.map((front) => (
+                    <div key={front.epicKey} className="flex flex-col gap-2">
+                      <div className="text-sm font-bold text-[var(--blue)]">
+                        {front.epicTitle}
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {front.issues.map((issue) => (
+                          <div
+                            key={issue.key}
+                            className={`flex flex-col gap-1 rounded-md border border-[var(--line)] bg-[var(--soft)] p-3 text-sm shadow-sm border-l-4 ${
+                              issue.isLate
+                                ? "border-l-[var(--orange)]"
+                                : "border-l-[var(--cyan)]"
+                            }`}
+                          >
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="font-semibold break-words">
+                                {issue.key} · {issue.title}
+                              </div>
+                              <div className="text-xs font-medium text-[var(--muted)] whitespace-nowrap pt-0.5">
+                                {issue.shortResolvedDate}
+                              </div>
+                            </div>
+                            {issue.parentContext && (
+                              <div className="text-xs text-[var(--muted)] mt-1 flex gap-1 items-center">
+                                <span className="bg-[var(--line)] w-1 h-1 rounded-full"></span>
+                                {issue.parentContext}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
+ReportView.displayName = "ReportView";
+
+const KpiCard = ({
+  title,
+  value,
+  icon,
+}: {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+}) => (
+  <div className="flex min-w-[140px] flex-col items-center justify-center rounded-xl bg-white border border-[var(--line)] p-4 shadow-sm">
+    <div className="mb-2">{icon}</div>
+    <div className="text-2xl font-bold text-[var(--text)]">{value}</div>
+    <div className="text-xs font-medium text-[var(--muted)] text-center mt-1">
+      {title}
+    </div>
+  </div>
+);
+
+
+

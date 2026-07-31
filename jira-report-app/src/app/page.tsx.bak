@@ -1,0 +1,172 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { FilterPanel, FilterState } from "@/components/FilterPanel";
+import { ReportView } from "@/components/ReportView";
+import { ReportData } from "@/types/jira";
+
+export default function Home() {
+  const [data, setData] = useState<ReportData | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const handleGenerate = async (filters: FilterState) => {
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/jira", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(filters),
+      });
+      if (!res.ok) {
+        let errMsg = "Error fetching data";
+        try {
+          const errorData = await res.json();
+          if (errorData.error) errMsg = errorData.error;
+        } catch (e) {}
+        throw new Error(errMsg);
+      }
+      const result: ReportData = await res.json();
+      setData(result);
+    } catch (err: any) {
+      console.error(err);
+      alert(`Error al consultar Jira:\n\n${err.message}\n\nRevisa la conexión, opciones o credenciales.`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleDownloadHtml = () => {
+    if (!reportRef.current || !data) return;
+    
+    // Create a copy of the HTML with embedded styles
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Informe Jira - ${data.periodLabel}</title>
+        <style>
+          /* Minimal embedded CSS for the exported HTML */
+          :root {
+            --blue: #091197;
+            --cyan: #03A9EC;
+            --orange: #F75600;
+            --white: #FFFFFF;
+            --bg: #F6F6F6;
+            --text: #12233D;
+            --muted: #5F6F82;
+            --line: #DBE4EE;
+            --ok: #0C8B4D;
+            --ok-bg: #E9F7EF;
+            --soft: #F8FBFF;
+          }
+          * { box-sizing: border-box; }
+          body, html {
+            margin: 0; padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+          }
+        </style>
+        <!-- Tailwind via CDN para simplificar en el archivo exportado si es necesario, 
+             aunque lo ideal es extraer el CSS parseado. 
+             Para este demo, usaremos el CDN de Tailwind para asegurar que se vea idéntico -->
+        <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+        <style type="text/tailwindcss">
+          @theme {
+            --color-var-blue: var(--blue);
+            --color-var-cyan: var(--cyan);
+            --color-var-orange: var(--orange);
+            --color-var-white: var(--white);
+            --color-var-bg: var(--bg);
+            --color-var-text: var(--text);
+            --color-var-muted: var(--muted);
+            --color-var-line: var(--line);
+            --color-var-ok: var(--ok);
+            --color-var-ok-bg: var(--ok-bg);
+            --color-var-soft: var(--soft);
+          }
+          .grid-projects {
+            min-height: 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+          }
+          .project-card {
+            min-height: 0;
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr;
+          }
+          .fronts {
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+          }
+        </style>
+      </head>
+      <body>
+        ${reportRef.current.outerHTML}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `informe_jira_${data.periodLabel.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!reportRef.current || !data) return;
+    
+    // We send the current HTML to the backend to render it via Puppeteer
+    try {
+      const htmlContent = reportRef.current.outerHTML;
+      const res = await fetch("/api/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ html: htmlContent }),
+      });
+      
+      if (!res.ok) throw new Error("Error generando PDF");
+      
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `informe_jira_${data.periodLabel.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo generar el PDF");
+    }
+  };
+
+  return (
+    <main className="flex h-screen w-screen overflow-hidden bg-[var(--bg)]">
+      {/* Panel lateral de filtros */}
+      <FilterPanel
+        onGenerate={handleGenerate}
+        isGenerating={isGenerating}
+        onDownloadHtml={handleDownloadHtml}
+        onDownloadPdf={handleDownloadPdf}
+        hasData={data !== null && data.totalClosures > 0}
+      />
+
+      {/* Vista principal del informe */}
+      <div className="flex-1 overflow-hidden relative">
+        <ReportView data={data} ref={reportRef} />
+      </div>
+    </main>
+  );
+}

@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --blue: #091197;
+  --cyan: #03a9ec;
+  --orange: #f75600;
+  --white: #ffffff;
+  --bg: #f6f6f6;
+  --text: #12233d;
+  --muted: #5f6f82;
+  --line: #dbe4ee;
+  --ok: #0c8b4d;
+  --ok-bg: #e9f7ef;
+  --soft: #f8fbff;
+}
+
+@theme inline {
+  --color-grupamar-blue: var(--blue);
+  --color-grupamar-cyan: var(--cyan);
+  --color-grupamar-orange: var(--orange);
+  --color-grupamar-white: var(--white);
+  --color-grupamar-bg: var(--bg);
+  --color-grupamar-text: var(--text);
+  --color-grupamar-muted: var(--muted);
+  --color-grupamar-line: var(--line);
+  --color-grupamar-ok: var(--ok);
+  --color-grupamar-ok-bg: var(--ok-bg);
+  --color-grupamar-soft: var(--soft);
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+}
+
+.grid-projects {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.project-card {
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.fronts {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar for inner content to match the clean look */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}

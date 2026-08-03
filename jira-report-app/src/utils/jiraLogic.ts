@@ -42,5 +42,21 @@ export function buildJql(filters: FilterState, startDate: string, endExclusiveDa
     ? `project in (${filters.projects.join(", ")})`
     : "project in (DES, HED, KPI, LG, MV, GRUPA, SPG)";
 
+  // Si estamos en modo ejecutivo o se marcó explícitamente incluir pendientes
+  const includeInProgress = filters.viewMode === "ejecutivo" || filters.includePending;
+  
+  if (includeInProgress) {
+    // Cuando incluimos In Progress, queremos las tareas que:
+    // 1. Se resolvieron en el período (Done) OR
+    // 2. Están actualmente en In Progress (o To Do si queremos ser amplios, pero In Progress es más exacto)
+    // Para simplificar y capturar actividad, buscamos statusCategory IN ("Done", "In Progress") 
+    // y aplicamos filtro de fechas a created/updated/resolved para capturar las que tuvieron actividad en el periodo.
+    // Dado que JQL es limitado para "estuvo in progress en estas fechas", usamos:
+    // (resolved >= startDate AND resolved < endDate) OR (statusCategory = "In Progress" AND updated >= startDate)
+    // Pero como queremos todo lo In Progress, podemos simplemente pedir todo lo In Progress de esos proyectos 
+    // o limitar por actualización reciente. Simplificamos pidiendo:
+    return `${projects} AND ((statusCategory = Done AND resolved >= "${startDate}" AND resolved < "${endExclusiveDate}") OR (statusCategory = "In Progress" AND updated >= "${startDate}")) ORDER BY project ASC, updated DESC`;
+  }
+
   return `${projects} AND statusCategory = Done AND resolved >= "${startDate}" AND resolved < "${endExclusiveDate}" ORDER BY project ASC, resolutiondate DESC`;
 }

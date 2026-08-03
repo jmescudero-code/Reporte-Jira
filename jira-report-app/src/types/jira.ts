@@ -7,6 +7,8 @@ export type JiraIssue = {
   projectKey: string;
   projectName: string;
   resolvedDate: string;
+  createdDate: string;
+  updatedDate: string;
   dueDate?: string | null;
   webUrl?: string;
   parentKey?: string;
@@ -20,8 +22,10 @@ export type ReportIssue = {
   key: string;
   title: string;
   status: string;
-  resolvedDate: string;
+  resolvedDate: string; // Puede ser nulo si está en progreso
   shortResolvedDate: string;
+  createdDate: string;
+  updatedDate: string;
   url?: string;
   parentContext?: string;
   isLate: boolean;

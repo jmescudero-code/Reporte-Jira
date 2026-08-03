@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { format, startOfWeek, endOfWeek, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 
 export type FilterState = {
+  viewMode: "operativo" | "ejecutivo";
   type: "week" | "month" | "custom";
   weekYear: number;
   weekNumber: number;
@@ -47,6 +48,7 @@ export const FilterPanel = ({
   const currentMonth = new Date().getMonth() + 1;
 
   const [filters, setFilters] = useState<FilterState>({
+    viewMode: "operativo",
     type: "week",
     weekYear: currentYear,
     weekNumber: currentWeek,
@@ -84,6 +86,33 @@ export const FilterPanel = ({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6 text-sm">
+        {/* Nivel de Detalle */}
+        <div className="flex flex-col gap-2">
+          <label className="font-semibold text-[var(--text)]">Nivel de Detalle</label>
+          <div className="flex flex-col gap-1 bg-[var(--soft)] p-3 rounded-md border border-[var(--line)]">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="viewMode"
+                checked={filters.viewMode === "operativo"}
+                onChange={() => setFilters({ ...filters, viewMode: "operativo" })}
+                className="accent-[var(--blue)]"
+              />
+              Operativo (Detalle de tareas)
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer mt-1">
+              <input
+                type="radio"
+                name="viewMode"
+                checked={filters.viewMode === "ejecutivo"}
+                onChange={() => setFilters({ ...filters, viewMode: "ejecutivo" })}
+                className="accent-[var(--blue)]"
+              />
+              Ejecutivo (Gantt y Resumen)
+            </label>
+          </div>
+        </div>
+
         {/* Tipo de Informe */}
         <div className="flex flex-col gap-2">
           <label className="font-semibold text-[var(--text)]">Período</label>

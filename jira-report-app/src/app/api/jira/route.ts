@@ -33,7 +33,7 @@ export async function POST(req: Request) {
         maxResults: 1000,
         fields: [
           "summary", "issuetype", "status", "project", 
-          "parent", "duedate", "resolutiondate"
+          "parent", "duedate", "resolutiondate", "created", "updated"
         ],
       }),
     });
@@ -104,8 +104,10 @@ export async function POST(req: Request) {
         }
       }
 
-      const resolvedDate = issue.fields.resolutiondate;
+      const resolvedDate = issue.fields.resolutiondate || "";
       const dueDate = issue.fields.duedate;
+      const createdDate = issue.fields.created || "";
+      const updatedDate = issue.fields.updated || "";
       const isLate = !!(dueDate && resolvedDate && isAfter(parseISO(resolvedDate), parseISO(dueDate)));
 
       parsedIssues.push({
@@ -117,6 +119,8 @@ export async function POST(req: Request) {
         projectKey: issue.fields.project?.key || "",
         projectName: issue.fields.project?.name || "",
         resolvedDate,
+        createdDate,
+        updatedDate,
         dueDate,
         webUrl: `${jiraHost}/browse/${issue.key}`,
         parentKey,
@@ -171,6 +175,8 @@ export async function POST(req: Request) {
         status: issue.status,
         resolvedDate: issue.resolvedDate,
         shortResolvedDate,
+        createdDate: issue.createdDate,
+        updatedDate: issue.updatedDate,
         url: issue.webUrl,
         parentContext,
         isLate: issue.isLate,

@@ -5,6 +5,7 @@ import { LOGO_BASE64 } from "@/utils/logo";
 import { useState, useRef, useEffect } from "react";
 import { FilterPanel, FilterState } from "@/components/FilterPanel";
 import { ReportView } from "@/components/ReportView";
+import { ExecutiveView } from "@/components/ExecutiveView";
 import { ReportData } from "@/types/jira";
 
 export default function Home() {
@@ -33,6 +34,7 @@ export default function Home() {
     }
   };
   const [data, setData] = useState<ReportData | null>(null);
+  const [currentFilters, setCurrentFilters] = useState<FilterState | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +56,7 @@ export default function Home() {
       }
       const result: ReportData = await res.json();
       setData(result);
+      setCurrentFilters(filters);
     } catch (err: any) {
       console.error(err);
       alert(`Error al consultar Jira:\n\n${err.message}\n\nRevisa la conexión, opciones o credenciales.`);
@@ -247,7 +250,11 @@ export default function Home() {
 
       {/* Vista principal del informe */}
       <div className="flex-1 overflow-hidden relative">
-        <ReportView data={data} ref={reportRef} />
+        {currentFilters?.viewMode === "ejecutivo" ? (
+          <ExecutiveView data={data} ref={reportRef} />
+        ) : (
+          <ReportView data={data} ref={reportRef} />
+        )}
       </div>
     </main>
   );

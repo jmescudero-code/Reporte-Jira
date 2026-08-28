@@ -97,13 +97,25 @@ export default function Home() {
             font-family: Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-y: auto;
+          }
+          ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+          ::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          ::-webkit-scrollbar-thumb {
+            background: #DBE4EE;
+            border-radius: 3px;
+          }
+          ::-webkit-scrollbar-thumb:hover {
+            background: #5F6F82;
           }
         </style>
-        <!-- Tailwind via CDN para simplificar en el archivo exportado si es necesario, 
-             aunque lo ideal es extraer el CSS parseado. 
-             Para este demo, usaremos el CDN de Tailwind para asegurar que se vea idéntico -->
+        <!-- Tailwind via CDN para simplificar en el archivo exportado -->
         <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
         <style type="text/tailwindcss">
           @theme {
@@ -119,22 +131,31 @@ export default function Home() {
             --color-var-ok-bg: var(--ok-bg);
             --color-var-soft: var(--soft);
           }
+          .page {
+            min-height: 100vh;
+            height: auto;
+          }
+          .content {
+            overflow: visible !important;
+          }
           .grid-projects {
             min-height: 0;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(2, minmax(0, 1fr));
             gap: 1rem;
           }
           .project-card {
-            min-height: 0;
+            min-height: 200px;
+            max-height: 520px;
             overflow: hidden;
-            display: grid;
-            grid-template-rows: auto 1fr;
+            display: flex;
+            flex-direction: column;
           }
           .fronts {
+            flex: 1;
             min-height: 0;
-            overflow-y: auto;
+            max-height: 460px;
+            overflow-y: auto !important;
             overflow-x: hidden;
           }
         </style>

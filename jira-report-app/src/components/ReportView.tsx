@@ -46,92 +46,92 @@ export const ReportView = forwardRef<HTMLDivElement, ReportViewProps>(
           </div>
         </div>
 
-        <div className="content flex flex-col p-6 gap-6 overflow-hidden">
+        <div className="content flex flex-col p-4 gap-4 overflow-hidden">
           {/* Header */}
-          <div className="flex shrink-0 gap-6">
-            <div className="flex flex-1 flex-col justify-center rounded-xl bg-gradient-to-r from-[var(--blue)] to-[var(--cyan)] p-6 text-white shadow-md">
-              <h1 className="text-2xl font-bold">
+          <div className="flex shrink-0 gap-4">
+            <div className="flex flex-1 flex-col justify-center rounded-xl bg-gradient-to-r from-[var(--blue)] to-[var(--cyan)] p-4 text-white shadow-sm">
+              <h1 className="text-xl font-bold">
                 Avance de la semana
               </h1>
-              <p className="mt-1 text-white/80 text-sm">
+              <p className="mt-0.5 text-white/80 text-xs">
                 {data.startDate} — {data.endDate}
               </p>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <KpiCard
                 title="Elementos finalizados"
                 value={data.totalClosures}
-                icon={<CheckCircle2 size={24} className="text-[var(--ok)]" />}
+                icon={<CheckCircle2 size={20} className="text-[var(--ok)]" />}
               />
               <KpiCard
                 title="Espacios con cierres"
                 value={data.projectsWithClosures}
-                icon={<LayoutGrid size={24} className="text-[var(--blue)]" />}
+                icon={<LayoutGrid size={20} className="text-[var(--blue)]" />}
               />
               <KpiCard
                 title="Frentes con avance"
                 value={data.frontsWithProgress}
-                icon={<CheckSquare size={24} className="text-[var(--cyan)]" />}
+                icon={<CheckSquare size={20} className="text-[var(--cyan)]" />}
               />
               <KpiCard
                 title="Fuera de fecha"
                 value={data.lateClosures}
-                icon={<Clock size={24} className="text-[var(--orange)]" />}
+                icon={<Clock size={20} className="text-[var(--orange)]" />}
               />
             </div>
           </div>
 
           {/* Grid de Proyectos */}
-          <div className="grid-projects">
+          <div className="grid-projects flex-1">
             {data.projects.map((project) => (
               <div
                 key={project.projectKey}
                 className="project-card rounded-xl bg-white border border-[var(--line)] shadow-sm"
               >
                 {/* Project Header */}
-                <div className="flex items-center gap-3 border-b border-[var(--line)] bg-[var(--soft)] px-5 py-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--blue)] text-xs font-bold text-white shrink-0">
+                <div className="flex items-center gap-2.5 border-b border-[var(--line)] bg-[var(--soft)] px-4 py-2.5">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--blue)] text-xs font-bold text-white shrink-0">
                     {project.totalClosures}
                   </div>
                   <div className="flex flex-col truncate">
-                    <span className="text-sm font-bold truncate">
+                    <span className="text-xs font-bold truncate">
                       {project.projectName}
                     </span>
-                    <span className="text-xs text-[var(--muted)]">
+                    <span className="text-[10px] text-[var(--muted)]">
                       {project.projectKey}
                     </span>
                   </div>
                 </div>
 
                 {/* Project Fronts */}
-                <div className="fronts p-4 flex flex-col gap-5">
+                <div className="fronts p-3 flex flex-col gap-3">
                   {project.fronts.map((front) => (
-                    <div key={front.epicKey} className="flex flex-col gap-2">
-                      <div className="text-sm font-bold text-[var(--blue)]">
+                    <div key={front.epicKey} className="flex flex-col gap-1.5">
+                      <div className="text-xs font-bold text-[var(--blue)]">
                         {front.epicTitle}
                       </div>
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-1.5">
                         {front.issues.map((issue) => (
                           <div
                             key={issue.key}
-                            className={`flex flex-col gap-1 rounded-md border border-[var(--line)] bg-[var(--soft)] p-3 text-sm shadow-sm border-l-4 ${
+                            className={`flex flex-col gap-0.5 rounded border border-[var(--line)] bg-[var(--soft)] p-2 text-xs shadow-2xs border-l-3 ${
                               issue.isLate
                                 ? "border-l-[var(--orange)]"
                                 : "border-l-[var(--cyan)]"
                             }`}
                           >
                             <div className="flex justify-between items-start gap-2">
-                              <div className="font-semibold break-words">
+                              <div className="font-semibold text-xs break-words leading-tight">
                                 {issue.key} · {issue.title}
                               </div>
-                              <div className="text-xs font-medium text-[var(--muted)] whitespace-nowrap pt-0.5">
+                              <div className="text-[10px] font-medium text-[var(--muted)] whitespace-nowrap pt-0.5">
                                 {issue.shortResolvedDate}
                               </div>
                             </div>
                             {issue.parentContext && (
-                              <div className="text-xs text-[var(--muted)] mt-1 flex gap-1 items-center">
-                                <span className="bg-[var(--line)] w-1 h-1 rounded-full"></span>
+                              <div className="text-[10px] text-[var(--muted)] mt-0.5 flex gap-1 items-center leading-tight">
+                                <span className="bg-[var(--line)] w-1 h-1 rounded-full shrink-0"></span>
                                 {issue.parentContext}
                               </div>
                             )}
@@ -161,10 +161,10 @@ const KpiCard = ({
   value: number;
   icon: React.ReactNode;
 }) => (
-  <div className="flex min-w-[140px] flex-col items-center justify-center rounded-xl bg-white border border-[var(--line)] p-4 shadow-sm">
-    <div className="mb-2">{icon}</div>
-    <div className="text-2xl font-bold text-[var(--text)]">{value}</div>
-    <div className="text-xs font-medium text-[var(--muted)] text-center mt-1">
+  <div className="flex min-w-[120px] flex-col items-center justify-center rounded-xl bg-white border border-[var(--line)] p-2.5 px-3 shadow-sm">
+    <div className="mb-1">{icon}</div>
+    <div className="text-xl font-bold text-[var(--text)]">{value}</div>
+    <div className="text-[11px] font-medium text-[var(--muted)] text-center mt-0.5">
       {title}
     </div>
   </div>

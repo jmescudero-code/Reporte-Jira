@@ -37,7 +37,7 @@ Ejemplo:
 {"PROYECTO_1": "Resumen 1...", "PROYECTO_2": "Resumen 2..."}`;
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -49,6 +49,8 @@ Ejemplo:
       );
 
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Gemini Batch API Error:", errorData);
         return NextResponse.json({ error: "Error en la API de IA" }, { status: 500 });
       }
 
@@ -98,7 +100,7 @@ Reglas importantes:
 5. Limítate a un máximo de 5-6 líneas en total.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
